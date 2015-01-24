@@ -10,7 +10,7 @@ Backlog:
 
 */
 
-angular.module('MyKanban.view.plain', ['ngRoute','ui.sortable', 'ui.bootstrap','MyKanban.view.card_modal', 'MyKanban.view.password_dialog'])
+angular.module('MyKanban.view.board', ['ngRoute','ui.sortable', 'ui.bootstrap','MyKanban.view.card_modal', 'MyKanban.view.password_dialog'])
 
 .config(['$routeProvider', '$httpProvider', function($routeProvider, $httpProvider) {
   $routeProvider.when('/board/:boardid', {

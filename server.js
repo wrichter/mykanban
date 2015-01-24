@@ -4,6 +4,9 @@ var express = require('express');
 var fs      = require('fs');
 var mongodb = require('mongodb');
 var path	= require('path');
+var route_index 	= require('./routes/index');
+var route_users		= require('./routes/users');
+var route_mkDropLink = require('./routes/mk-droplink');
 
 var App = function(){
 
@@ -24,11 +27,11 @@ var App = function(){
 	};
 
 	// Web app logic
-	self.routes = {};
+	/*self.routes = {};
 	self.routes['health'] = function(req, res){ res.send('1'); };
 	self.routes['root'] = function(req, res) {
 		res.send('You have come to the park apps web service. All the web services are at /ws/parks*. For example /ws/parks will return all the parks in the system in a JSON payload. Thanks for stopping by and have a nice day');
-	};
+	};*/
 
 	
 
@@ -43,9 +46,11 @@ var App = function(){
 		self.app.use(express.static(path.join(__dirname, 'static')));
 	});
 
-	self.app.get('/health', self.routes['health']);
-	self.app.get('/test', self.routes['root']);
+	/*self.app.get('/health', self.routes['health']);
+	self.app.get('/test', self.routes['root']);*/
 	
+	self.app.use('/', routes_index);
+	self.app.use('/api/v1/', routes_mkDropLink);
 
 
 	// Logic to open a database connection. We are going to call this outside of

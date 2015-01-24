@@ -1,7 +1,7 @@
 {
-  "name": "OpenShift-Sample-App",
-  "version": "1.0.0",
-  "description": "OpenShift Sample Application",
+  "name": "MyKanban",
+  "version": "0.0.0",
+  "description": "MyKanban",
   "keywords": [
     "OpenShift",
     "Node.js",
@@ -9,8 +9,8 @@
     "openshift"
   ],
   "author": {
-    "name": "OpenShift",
-    "email": "ramr@example.org",
+    "name": "Wolfram Richter",
+    "email": "wrichter@redhat.com",
     "url": "http://www.openshift.com/"
   },
   "homepage": "http://www.openshift.com/",

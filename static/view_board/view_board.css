@@ -1,0 +1,64 @@
+
+
+.mk-card:hover, .mk-card-hover {
+  border-color:red;
+}
+
+.mk-card .panel-body {
+  font-size: large;
+}
+
+
+.mk-listContainer {
+  background-color: #FFFFFF;
+  border-radius: 10px 10px 10px 10px;
+  border-width: thin;
+  border-style: solid;
+  border-color: #F0F0F0;
+  padding: 5px 5px 5px 5px;
+  margin: 5px 5px 5px 5px;
+}
+
+.mk-listContainer .listName {
+    font-weight: bold;
+    font-size: large;
+    margin: 0px 5px 5px 5px;
+    display: inline-block;
+}
+
+.mk-list {
+}
+
+.mk-list div .panel-footer {
+    padding: 5px;
+}
+
+.mk-list div .panel-heading {
+    padding: 5px;
+}
+
+.glyphicon-none:before {
+    content: "\2122";
+    color: transparent !important;
+}
+
+.glyphicon {
+    margin-right: 4px;
+    margin-left: 4px;
+}
+
+.glyphicon:hover {
+    color:red;
+}
+
+.mk-clusterheader hr {
+    margin: 0px 0px 5px 0px;
+}
+
+.mk-clustertitle {
+    text-size: small;
+}
+
+.mk-clusteraggregate {
+    float: right;
+}

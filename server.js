@@ -40,7 +40,7 @@ var App = function(){
 	self.app  = express();
 	self.app.use(bodyParser);
 	//self.app.use(express.methodOverride());
-	self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+	//self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 	self.app.use(express.static(path.join(__dirname, 'static')));
 
 	/*self.app.get('/health', self.routes['health']);

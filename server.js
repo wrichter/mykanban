@@ -49,8 +49,8 @@ var App = function(){
 	/*self.app.get('/health', self.routes['health']);
 	self.app.get('/test', self.routes['root']);*/
 	
-	self.app.use('/', routes_index);
-	self.app.use('/api/v1/', routes_mkDropLink);
+	self.app.use('/', route_index);
+	self.app.use('/api/v1/', route_mkDropLink);
 
 
 	// Logic to open a database connection. We are going to call this outside of

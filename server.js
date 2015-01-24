@@ -1,7 +1,7 @@
 #!/bin/env node
 
 var express = require('express');
-var fs      = require('fs');
+//var fs      = require('fs');
 var mongodb = require('mongodb');
 var path	= require('path');
 //var bodyParser 		= require ('body-parser');
@@ -38,18 +38,16 @@ var App = function(){
 
 	// Webapp urls
 	self.app  = express();
-	self.app.configure(function() {
-		//self.app.use(bodyParser);
-		//self.app.use(express.methodOverride());
-		//self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-		self.app.use(express.static(path.join(__dirname, 'static')));
+	//self.app.use(bodyParser);
+	//self.app.use(express.methodOverride());
+	//self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+	self.app.use(express.static(path.join(__dirname, 'static')));
+
+	/*self.app.get('/health', self.routes['health']);
+	self.app.get('/test', self.routes['root']);*/
 	
-		/*self.app.get('/health', self.routes['health']);
-		self.app.get('/test', self.routes['root']);*/
-		
-		//self.app.use('/', route_index);
-		//self.app.use('/api/v1/', route_mkDropLink);
-	});
+	//self.app.use('/', route_index);
+	//self.app.use('/api/v1/', route_mkDropLink);
 
 	// Logic to open a database connection. We are going to call this outside of
 	// app so it is available to all our functions inside.

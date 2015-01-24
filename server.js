@@ -5,7 +5,7 @@ var express = require('express');
 var mongodb = require('mongodb');
 var path	= require('path');
 //var bodyParser 		= require ('body-parser');
-//var route_index 	= require('./routes/index');
+var route_index 	= require('./routes/index');
 //var route_users		= require('./routes/users');
 //var route_mkDropLink = require('./routes/mk-droplink');
 
@@ -27,14 +27,7 @@ var App = function(){
 		console.warn('No OPENSHIFT_NODEJS_IP environment variable');
 	};
 
-	// Web app logic
-	/*self.routes = {};
-	self.routes['health'] = function(req, res){ res.send('1'); };
-	self.routes['root'] = function(req, res) {
-		res.send('You have come to the park apps web service. All the web services are at /ws/parks*. For example /ws/parks will return all the parks in the system in a JSON payload. Thanks for stopping by and have a nice day');
-	};*/
 
-	
 
 	// Webapp urls
 	self.app  = express();
@@ -42,10 +35,7 @@ var App = function(){
 	//self.app.use(express.methodOverride());
 	//self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 	self.app.use(express.static(path.join(__dirname, 'static')));
-
-	/*self.app.get('/health', self.routes['health']);
-	self.app.get('/test', self.routes['root']);*/
-	
+	self.app.get('/health', function(req, res){ res.send('1'); });
 	//self.app.use('/', route_index);
 	//self.app.use('/api/v1/', route_mkDropLink);
 

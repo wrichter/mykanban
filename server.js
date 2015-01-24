@@ -44,7 +44,7 @@ var App = function(){
 	});
 
 	self.app.get('/health', self.routes['health']);
-	self.app.get('/', self.routes['root']);
+	self.app.get('/test', self.routes['root']);
 	
 
 

@@ -15,6 +15,8 @@ module.exports = function(db, baseURL) {
 				'name': undefined,
 				'lists': []
 		};
+		if (req.body.name) board['name'] = req.body.name;
+		if (req.body.name) board['lists'] = req.body.lists;
 
 		db.collection('board').insert(
 				board, 

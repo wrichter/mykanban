@@ -37,14 +37,10 @@ var App = function(){
 
 	// Webapp urls
 	self.app  = express();
-	// This uses the Connect frameworks body parser to parse the body of the
-	// post request
-	self.app.configure(function () {
-		self.app.use(express.bodyParser());
-		self.app.use(express.methodOverride());
-		self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-		self.app.use(express.static(path.join(__dirname, 'static')));
-	});
+	self.app.use(express.bodyParser());
+	self.app.use(express.methodOverride());
+	self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+	self.app.use(express.static(path.join(__dirname, 'static')));
 
 	/*self.app.get('/health', self.routes['health']);
 	self.app.get('/test', self.routes['root']);*/

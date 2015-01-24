@@ -5,9 +5,9 @@ var fs      = require('fs');
 var mongodb = require('mongodb');
 var path	= require('path');
 var bodyParser 		= require ('body-parser');
-var route_index 	= require('./routes/index');
-var route_users		= require('./routes/users');
-var route_mkDropLink = require('./routes/mk-droplink');
+//var route_index 	= require('./routes/index');
+//var route_users		= require('./routes/users');
+//var route_mkDropLink = require('./routes/mk-droplink');
 
 var App = function(){
 
@@ -47,7 +47,7 @@ var App = function(){
 	self.app.get('/test', self.routes['root']);*/
 	
 	//self.app.use('/', route_index);
-	self.app.use('/api/v1/', route_mkDropLink);
+	//self.app.use('/api/v1/', route_mkDropLink);
 
 
 	// Logic to open a database connection. We are going to call this outside of

@@ -36,7 +36,7 @@
   "main": "server.js",
   
   
-  scripts": { 
+  "scripts": { 
   	"postinstall": "export HOME=$HOME/app-root/runtime/repo; ./node_modules/bower/bin/bower install"
   }
 }

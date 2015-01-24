@@ -46,7 +46,7 @@ var App = function(){
 	/*self.app.get('/health', self.routes['health']);
 	self.app.get('/test', self.routes['root']);*/
 	
-	self.app.use('/', route_index);
+	//self.app.use('/', route_index);
 	self.app.use('/api/v1/', route_mkDropLink);
 
 

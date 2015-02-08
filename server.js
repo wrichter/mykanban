@@ -3,9 +3,16 @@
 var express 		= require('express');
 //var fs      		= require('fs');
 var mongodb 		= require('mongodb');
+var mongoose		= require('mongoose');
 var path			= require('path');
 var bodyParser 		= require('body-parser');
+var cookieParser	= require('cookie-parser');
+//var expressSession	= require('express-session');
+var errorHandler	= require('errorhandler');
 var ApiV1 			= require('./modules/APIV1');
+var passport		= require('passport');
+//var	LocalStrategy	= require('passport-local').Strategy;
+var BasicStrategy	= require('passport-http').BasicStrategy;
 
 var ServerApp = function(){
 
@@ -44,17 +51,45 @@ var ServerApp = function(){
 			}
 		});
 	};
+	
+	self.connectDbMongoose = function(callback) {
+		var options = {};
+		if (self.dbUser) options.user = self.dbUser;
+		if (self.dbPass) options.pass = self.dbPass;
+		mongoose.connect('mongodb://' + mongoHost + ':' + mongoPort + '/' + mongoDB, options, function(err) {
+			if (err) throw err;
+			callback();
+		});
+	}
 
 	// starting the nodejs server with express
 	self.startServer = function() {
 		// Webapp urls
 		self.app  = express();
 		self.app.use(bodyParser.json());
+		self.app.use(cookieParser());
+/*		self.app.use(expressSession({
+			secret: 'top secret',
+			resave: false,
+			saveUninitialized: true
+		}));*/
 		//self.app.use(express.methodOverride());
-		//self.app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+		self.app.use(errorHandler({ log: true }));
 		self.app.use(express.static(path.join(__dirname, 'static')));
 		self.app.get('/health', function(req, res){ res.send('1'); });
-		self.app.use('/api/v1/', (new ApiV1(self.db, '/api/v1/')).router);
+		
+		self.app.use(passport.initialize());
+		//self.app.use(passport.session());
+		
+		passport.use(new BasicStrategy(function (username, password, done) {
+			if (password === 'abc') { //TODO
+				return done(null, { username: username });
+			} else {
+				return done(null, false);
+			}
+		}));
+		self.app.all('/api/*', passport.authenticate('basic', { session: false }));
+		self.app.use('/api/v1/', (new ApiV1('/api/v1/')).router);
 		
 		self.app.listen(self.port, self.ipaddr, function(){
 			console.log('%s: Node server started on %s:%d ...', Date(Date.now()), self.ipaddr, self.port);
@@ -90,4 +125,4 @@ var ServerApp = function(){
 
 //call the connectDb function and pass in the start server command
 var serverApp = new ServerApp();
-serverApp.connectDb(serverApp.startServer);
+serverApp.connectDbMongoose(serverApp.startServer);

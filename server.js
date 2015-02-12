@@ -9,7 +9,7 @@ var bodyParser 		= require('body-parser');
 var cookieParser	= require('cookie-parser');
 //var expressSession	= require('express-session');
 var errorHandler	= require('errorhandler');
-var ApiV1 			= require('./modules/APIV1');
+var ApiV1 			= require('./modules/api/v1/routes');
 var passport		= require('passport');
 //var	LocalStrategy	= require('passport-local').Strategy;
 var BasicStrategy	= require('passport-http').BasicStrategy;
@@ -23,7 +23,7 @@ var ServerApp = function(){
 	var mongoHost = process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost';
 	var mongoPort = process.env.OPENSHIFT_MONGODB_DB_PORT || '27017';
 	var mongoDB	  = process.env.OPENSHIFT_APP_NAME 		  || 'mykanban';
-		
+
 	self.dbServer = new mongodb.Server(mongoHost, parseInt(mongoPort));
 	self.db = new mongodb.Db(mongoDB, self.dbServer, {auto_reconnect: true});
 	self.dbUser = process.env.OPENSHIFT_MONGODB_DB_USERNAME;
@@ -51,7 +51,7 @@ var ServerApp = function(){
 			}
 		});
 	};
-	
+
 	self.connectDbMongoose = function(callback) {
 		var options = {};
 		if (self.dbUser) options.user = self.dbUser;
@@ -74,13 +74,12 @@ var ServerApp = function(){
 			saveUninitialized: true
 		}));*/
 		//self.app.use(express.methodOverride());
-		self.app.use(errorHandler({ log: true }));
 		self.app.use(express.static(path.join(__dirname, 'static')));
 		self.app.get('/health', function(req, res){ res.send('1'); });
-		
+
 		self.app.use(passport.initialize());
 		//self.app.use(passport.session());
-		
+
 		passport.use(new BasicStrategy(function (username, password, done) {
 			if (password === 'abc') { //TODO
 				return done(null, { username: username });
@@ -89,8 +88,9 @@ var ServerApp = function(){
 			}
 		}));
 		self.app.all('/api/*', passport.authenticate('basic', { session: false }));
-		self.app.use('/api/v1/', (new ApiV1('/api/v1/')).router);
-		
+		self.app.use('/api/v1/', (new ApiV1('/api/v1')).router);
+		self.app.use(errorHandler({ log: true }));
+
 		self.app.listen(self.port, self.ipaddr, function(){
 			console.log('%s: Node server started on %s:%d ...', Date(Date.now()), self.ipaddr, self.port);
 		});
@@ -106,18 +106,18 @@ var ServerApp = function(){
 	};
 
 	process.on('exit', function() { self.terminator(); });
-	['SIGHUP', 
-	 'SIGINT', 
-	 'SIGQUIT', 
-	 'SIGILL', 
-	 'SIGTRAP', 
-	 'SIGABRT', 
-	 'SIGBUS', 
-	 'SIGFPE', 
-	 'SIGUSR1', 
+	['SIGHUP',
+	 'SIGINT',
+	 'SIGQUIT',
+	 'SIGILL',
+	 'SIGTRAP',
+	 'SIGABRT',
+	 'SIGBUS',
+	 'SIGFPE',
+	 'SIGUSR1',
 	 'SIGSEGV',
-	 'SIGUSR2', 
-	 'SIGPIPE', 
+	 'SIGUSR2',
+	 'SIGPIPE',
 	 'SIGTERM'].forEach(function(element, index, array) {
 		 process.on(element, function() { self.terminator(element); });
 	});

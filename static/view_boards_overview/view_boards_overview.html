@@ -1,0 +1,7 @@
+<div>
+  <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<div ng-show="boards != null">
+  <a ng-repeat="board in boards" ng-click="navigateTo(board.href)">{{board.title}}</a>
+</div>

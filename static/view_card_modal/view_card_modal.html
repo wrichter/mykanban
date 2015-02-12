@@ -1,17 +1,26 @@
-<link href="view_card_modal/view_card_modal.css" rel="stylesheet">
-
-
 <div class="modal-header">
-  <h3 class="modal-title">I'm a modal!</h3>
+
+  <h3 class="modal-title">{{tempCard.title}}</h3>
 </div>
+
 <div class="modal-body">
-  Hello World
-  <br/>
-  <input type="text" ng-model="tempCard.href"></input>
-  <BR />
-  <input type="text" ng-model="tempCard.text"></input>
+  <textarea style="width: 100%; height: 100%" type="text" ng-model="tempCard.back"></textarea>
+
+  <h5>Attributes</h5>
+  <div data-ng-repeat="attribute in tempCard.attribute">
+    {{attribute.name}} ({{attribute.type}}) <input type="text" ng-model="attribute.value"></input>
+  </div>
+  <h5>Tags</h5>
+  <div data-ng-repeat="tag in tempCard.tag">
+    {{tag}}
+  </div>
+  <h5>Link</h5>
+  <div data-ng-repeat="link in tempCard.link">
+    {{link.title}} <a href="{{link.href}}" target="_blank">{{link.href}}</a>
+  </div>
 </div>
 <div class="modal-footer">
+  <span class="pull-left">{{tempCard.href}}</span>
   <button class="btn btn-primary" ng-click="ok()">OK</button>
   <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
 </div>

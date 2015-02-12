@@ -1,11 +1,10 @@
 
-
 .mk-card:hover, .mk-card-hover {
   border-color:red;
 }
 
 .mk-card .panel-body {
-  font-size: large;
+  font-size: medium;
 }
 
 
@@ -24,6 +23,11 @@
     font-size: large;
     margin: 0px 5px 5px 5px;
     display: inline-block;
+}
+
+.boardName {
+  font-size: 200%;
+  font-weight: bold;
 }
 
 .mk-list {

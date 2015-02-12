@@ -19,7 +19,7 @@
     <!-- the list container -->
     <div data-ng-repeat="list in visibleLists()" class="col-md-2 mk-listContainer">
 
-      <span class="listName" contenteditable="at == null" mk-blur-on-enter ng-model="list.title" />
+      <span class="listName" contenteditable="true" mk-blur-on-enter ng-model="list.title" />
 
         <span class="pull-right">
           <span class="glyphicon glyphicon-trash" ng-click="removeList(board, list)"></span>

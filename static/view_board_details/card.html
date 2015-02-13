@@ -1,12 +1,14 @@
 <div class="panel-heading" >
   <span ng-show="! cluster">
-    <span class="glyphicon glyphicon-arrow-left" ></span>
-    <span class="glyphicon glyphicon-arrow-right pull-right" ></span>
+    <!--<span class="glyphicon glyphicon-arrow-left" ></span>
+    <span class="glyphicon glyphicon-arrow-right pull-right" ></span> -->
+    <span class="">&nbsp;</span>
     <span class="glyphicon glyphicon-edit pull-right" ng-click="open_card('lg', card)" ></span>
-    <span class="glyphicon glyphicon-trash pull-right" ng-click="removeCard(list, card)"></span>
+    <span class="glyphicon glyphicon-trash pull-right" ng-click="removeCard(list, card)" ng-show="getLinkOfRel(card, 'remove')"></span>
     <a data-ng-repeat="link in relatedLinks(card)" href="{{link.href}}" target="_blank" class="glyphicon glyphicon-link pull-right" popover="{{link.title}}" popover-placement="bottom" popover-trigger="mouseenter" popover-append-to-body="true"></a>
   </span>
   <span ng-show="cluster">&nbsp;</span>
 </div>
-<div class="panel-body" contenteditable="true" mk-blur-on-enter ng-model="card.title" ></div>
+<div class="panel-body" contenteditable="true" mk-blur-on-enter ng-model="card.title" ng-show="at == null" ></div>
+<div class="panel-body" ng-show="at != null" >{{card.title}}</div>
 <div class="panel-footer" ng-show="card.tag && card.tag.length > 0"><span ng-repeat="tag in card.tag"><span class="badge">{{tag}}</span> </span></div>

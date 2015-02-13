@@ -78,6 +78,7 @@ module.controller( "ViewController", [
   $scope.cardSortableOptions = {
     connectWith: ".mk-list",
     cancel: ".panel-body",
+    disabled: ($scope.at != null),
     stop: function( e, ui ) {
       var s = ui.item.sortable;
       //console.log("stop", s.index,  s.sourceModel, s.dropindex, s.droptargetModel, ui.sender);
@@ -91,6 +92,7 @@ module.controller( "ViewController", [
   $scope.listSortableOptions = {
     connectWith: ".mk-listContainer",
     cancel: ".listName, .panel",
+    disabled: ($scope.at != null),
     stop: function( e, ui ) {
       var s = ui.item.sortable;
       //console.log("stop", s.index,  s.sourceModel, s.dropindex, s.droptargetModel, ui.sender);
@@ -107,7 +109,8 @@ module.controller( "ViewController", [
       controller: 'ViewCardCtrl',
       size: size,
       resolve: {
-        card: function() { return card; }
+        card: function() { return card; },
+        readOnly: function () { return $scope.at != null; }
       }
     } ).result.then(function() {
       CardService.update( card )
@@ -205,6 +208,24 @@ module.controller( "ViewController", [
     }
     return res;
   };
+
+  $scope.getLinkOfRel = function( item, rel ) {
+    var res = [];
+    item.link.forEach( function( link ) {
+        if ( link.rel === rel ) {
+          res.push( link );
+        }
+    });
+    if (res.length == 0) {
+      return undefined;
+    } else if (res.length == 1) {
+      return res[0];
+    } else {
+      return res;
+    }
+  }
+
+  // -------- TODO ------------
 
   $scope.get_password = function(auth, promise) {
     var modalInstance = $modal.open({
@@ -467,7 +488,6 @@ module.directive( "mkLinkGrabber", function() {
             scope.$apply( function() {
               //ngModel.$modelValue.link = ta.val();
               scope.linkDroppedOnCard(ngModel.$modelValue, ta.val());
-
             });
             remove();
           }, 0);
@@ -476,22 +496,18 @@ module.directive( "mkLinkGrabber", function() {
     }
   };
 })
-
-.directive( "mkContenteditable", ['$compile', function( $compile ) {
+/*
+module.directive( "mkUiSortable", ["$compile", function($compile) {
   return {
-    restrict: 'A',
+    restrict: "A",
     link: function(scope, element, attrs) {
-              scope.$watch(attrs.mkContenteditable, function(editable) {
-                if ( editable ) {
-                  element.attr('contenteditable', 'true');
-                } else {
-                  element.removeAttr('contenteditable');
-                }
-                console.log(element);
-                element.removeAttr("mkContenteditable");
-                element.removeAttr("mk-contenteditable")
-                $compile(element)(scope);
-              } );
-            }
+      scope.$watch( scope.at, function( ) {
+        if ( scope.at == null ) {
+          element.attr( "ui-sortable", attrs.mkUiSortable );
+        }
+        element.removeAttr( "mk-ui-sortable" );
+        $compile( element )( scope );
+      } );
     }
-} ] );
+  };
+} ] ) */;

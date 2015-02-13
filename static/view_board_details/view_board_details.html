@@ -10,7 +10,8 @@
 
 <div ng-show="board != null">
   <span class="boardName">
-    <span contenteditable="true" mk-blur-on-enter ng-model="board.title" />
+    <span contenteditable="true" mk-blur-on-enter ng-model="board.title" ng-show="at == null"/>
+    <span ng-show="at != null">{{board.title}}</span>
     <span ng-show="at"> as of {{at | date:'yyyy-MM-dd HH:mm:ss'}}</span>
   </span>
 
@@ -19,10 +20,11 @@
     <!-- the list container -->
     <div data-ng-repeat="list in visibleLists()" class="col-md-2 mk-listContainer">
 
-      <span class="listName" contenteditable="true" mk-blur-on-enter ng-model="list.title" />
+      <span class="listName" contenteditable="true" mk-blur-on-enter ng-model="list.title" ng-show="at == null" />
+      <span class="listName" ng-show="at != null" >{{list.title}}</span>
 
         <span class="pull-right">
-          <span class="glyphicon glyphicon-trash" ng-click="removeList(board, list)"></span>
+          <span class="glyphicon glyphicon-trash" ng-click="removeList(board, list)"  ng-show="getLinkOfRel(list, 'remove')"></span>
           <!-- Simple dropdown -->
           <span class="dropdown"  dropdown>
             <span class="dropdown-toggle glyphicon glyphicon-list" dropdown-toggle></span>

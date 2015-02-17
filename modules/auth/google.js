@@ -6,8 +6,7 @@ var backend         = require( "../api/v1/mongobackend" );
 module.exports = function( app, successRedirect, failureRedirect ) {
   var CLIENTID = process.env.GOOGLE_AUTH_CLIENTID || "585754478444-7a4sbljvjvu3pkn6o8ltvqjtti0ccfq6.apps.googleusercontent.com";
   var CLIENTSECRET = process.env.GOOGLE_AUTH_CLIENTSECRET;
-  var DNS  = process.env.OPENSHIFT_APP_DNS || "localhost";
-  var PORT = parseInt(process.env.OPENSHIFT_NODEJS_PORT) || 8080;
+  var SERVER  = process.env.OPENSHIFT_APP_DNS || "localhost:8080";
 
   // used to serialize the user for the session
   passport.serializeUser( function( user, done ) {
@@ -22,7 +21,7 @@ module.exports = function( app, successRedirect, failureRedirect ) {
   passport.use(new GoogleStrategy({
       clientID:       CLIENTID,
       clientSecret:   CLIENTSECRET,
-      callbackURL:    "http://" + DNS + ":" + PORT + "/oauth2callback"
+      callbackURL:    "http://" + SERVER + "/oauth2callback"
   }, function( token, refreshToken, profile, done ) {
     backend.User.findOne( { "google.id": profile.id }, function( err, user ) {
       if ( err ) {

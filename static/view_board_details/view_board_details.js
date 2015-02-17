@@ -54,7 +54,6 @@ module.controller( "ViewController", [
   }
 
   $scope.navigateToVersionAt = function(date) {
-alert(date);
     $location.path("/board/" + $scope.boardid + "/" + date.toISOString() );
   }
 

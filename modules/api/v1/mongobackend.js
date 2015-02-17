@@ -23,8 +23,8 @@ var Backend = function() {
 		containedBy:	{ type: mongoose.Schema.Types.ObjectId },
 		positionHint: 	{ type: Number, 'default': -1 },
 		acl:			{ 								//for boards
-			read:		[{ type: String }],
-			write: 		[{ type: String }]
+			read:		[{ type: mongoose.Schema.Types.ObjectId }],
+			write: 		[{ type: mongoose.Schema.Types.ObjectId }]
 		},
 		back:			{ type: String }				//for cards
 	});
@@ -117,6 +117,16 @@ var Backend = function() {
 	self.Board.schema.path('attribute').validate(hasDuplicateAttributes, 'Board has duplicate attributes');
 	self.List.schema.path('attribute').validate(hasDuplicateAttributes, 'List has duplicate attributes');
 	self.Card.schema.path('attribute').validate(hasDuplicateAttributes, 'Card has duplicate attributes');
+
+	var userschema = {
+		google: {
+			id: String,
+			emails: [String],
+			token: String,
+			refreshToken: String
+		}
+	}
+	self.User = mongoose.model('user', userschema);
 }
 
 module.exports = new Backend();

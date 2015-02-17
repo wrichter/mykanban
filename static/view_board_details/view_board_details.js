@@ -53,17 +53,22 @@ module.controller( "ViewController", [
                 } );
   }
 
-  //$watching will automatically ensure the functions are called during initialization
-  $scope.$watch( "at", function( at ) {
-    if ( at ) {
-      $location.path("/board/" + $scope.boardid + "/" + at.toISOString() );
-    }
-  } );
-  loadBoard( $scope.at );
+  $scope.navigateToVersionAt = function(date) {
+alert(date);
+    $location.path("/board/" + $scope.boardid + "/" + date.toISOString() );
+  }
 
   $scope.navigateToCurrentVersion = function() {
     $location.path("/board/" + $scope.boardid);
   }
+
+  //$watching will automatically ensure the functions are called during initialization
+  $scope.$watch( "at", function( at ) {
+    if ( at ) {
+      $scope.navigateToVersionAt(at);
+    }
+  } );
+  loadBoard( $scope.at );
 
   $scope.closeAlert = function( index ) {
     $scope.alerts.splice( index, 1 );

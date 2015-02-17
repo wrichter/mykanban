@@ -3,5 +3,10 @@
 angular.module('MyKanban', ['ngRoute', 'MyKanban.view.boards', 'MyKanban.view.board'])
 
 .config(['$routeProvider', function($routeProvider) {
-  $routeProvider.otherwise({redirectTo: '/boards'});
+  $routeProvider.when( "/login", {
+    templateUrl: "login.html"
+  } );
+
+
+  $routeProvider.otherwise({redirectTo: '/login'});
 }]);

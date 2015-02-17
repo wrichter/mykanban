@@ -17,8 +17,8 @@ module.exports = function(baseURL) {
 		else backend.Board.findInstance(boardid, undefined, undefined, function(err, board) { //use current ACL, not history one
 			if (err) throw err;
 			else if (!board) res.status(404).send('board ' + boardid + ' not found');
-			else if (checkRead && (!board.acl.read || board.acl.read.indexOf(req.user.username) < 0)) res.status(403).send('no read access to board ' + boardid);
-			else if (checkWrite && (!board.acl.write || board.acl.write.indexOf(req.user.username) < 0)) res.status(403).send('no write access to board ' + boardid);
+			else if (checkRead && (!board.acl.read || board.acl.read.indexOf(req.user._id) < 0)) res.status(403).send('no read access to board ' + boardid);
+			else if (checkWrite && (!board.acl.write || board.acl.write.indexOf(req.user._id) < 0)) res.status(403).send('no write access to board ' + boardid);
 			else if (!req.query.at) callback(board); //we already have loaded the right board
 			//since at was provided, we need to load the board at the right time
 			else backend.Board.findInstance(boardid, req.query.at, undefined, function(err, board) {
@@ -52,7 +52,7 @@ module.exports = function(baseURL) {
 		var board  = new backend.Board();
 		self.pr.parse(req.body, board);
 
-		board.acl = { read: [req.user.username], write: [req.user.username] };
+		board.acl = { read: [req.user._id], write: [req.user._id] };
 		board.save(function(err, board) {
 			if (err) throw err;
 			else {
@@ -228,7 +228,7 @@ module.exports = function(baseURL) {
 	//get all boards - RC5023 5.2
 	self.router.get('/boards', function(req,res) { //TODO validate ACL!
 		backend.Board.find({ validTo: { $exists: false } },undefined,undefined, function(err, boards) {
-console.log(err, boards, req.user.username);
+console.log(err, boards, req.user._id);
 			if (err) throw err;
 			else res.status(200).send(self.pr.renderBoardArray(boards));
 		});

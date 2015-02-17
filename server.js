@@ -4,15 +4,14 @@ var express 		= require('express');
 //var fs      		= require('fs');
 var mongodb 		= require('mongodb');
 var mongoose		= require('mongoose');
-var path			= require('path');
+var path				= require('path');
 var bodyParser 		= require('body-parser');
 var cookieParser	= require('cookie-parser');
-//var expressSession	= require('express-session');
+var expressSession	= require('express-session');
 var errorHandler	= require('errorhandler');
-var ApiV1 			= require('./modules/api/v1/routes');
-var passport		= require('passport');
-//var	LocalStrategy	= require('passport-local').Strategy;
-var BasicStrategy	= require('passport-http').BasicStrategy;
+var ApiV1 				= require('./modules/api/v1/routes');
+var passport			= require('passport');
+var googleAuth		= require("./modules/auth/google.js");
 
 var ServerApp = function(){
 
@@ -23,6 +22,7 @@ var ServerApp = function(){
 	var mongoHost = process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost';
 	var mongoPort = process.env.OPENSHIFT_MONGODB_DB_PORT || '27017';
 	var mongoDB	  = process.env.OPENSHIFT_APP_NAME 		  || 'mykanban';
+	var secret		= process.env.OPENSHIFT_SECRET_TOKEN || 'change.me';
 
 	self.dbServer = new mongodb.Server(mongoHost, parseInt(mongoPort));
 	self.db = new mongodb.Db(mongoDB, self.dbServer, {auto_reconnect: true});
@@ -68,27 +68,24 @@ var ServerApp = function(){
 		self.app  = express();
 		self.app.use(bodyParser.json());
 		self.app.use(cookieParser());
-/*		self.app.use(expressSession({
-			secret: 'top secret',
+		self.app.use(expressSession({
+			secret: secret,
 			resave: false,
 			saveUninitialized: true
-		}));*/
+		}));
 		//self.app.use(express.methodOverride());
 		self.app.use(express.static(path.join(__dirname, 'static')));
 		self.app.get('/health', function(req, res){ res.send('1'); });
 
 		self.app.use(passport.initialize());
-		//self.app.use(passport.session());
+		self.app.use(passport.session());
 
-		passport.use(new BasicStrategy(function (username, password, done) {
-			if (password === 'abc') { //TODO
-				return done(null, { username: username });
-			} else {
-				return done(null, false);
-			}
-		}));
-		self.app.all('/api/*', passport.authenticate('basic', { session: false }));
-		self.app.use('/api/v1/', (new ApiV1('/api/v1')).router);
+		//security config
+		googleAuth(self.app, '/#/boards', '/#/login' );
+		self.app.use('/api/v1/', function(req,res, next) {
+			if (req.isAuthenticated()) return next();
+			res.redirect('/#/login');
+		}, (new ApiV1('/api/v1')).router);
 		self.app.use(errorHandler({ log: true }));
 
 		self.app.listen(self.port, self.ipaddr, function(){

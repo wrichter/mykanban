@@ -15,11 +15,7 @@ var Backend = function() {
 			type:		{ type: String },
 			title:		{ type: String }
 		}],
-		attribute:		[{
-			name:		{ type: String },
-			type:		{ type: String },
-			value:		{ type: mongoose.Schema.Types.Mixed }
-		}],
+		attribute:		{},
 		containedBy:	{ type: mongoose.Schema.Types.ObjectId },
 		positionHint: 	{ type: Number, 'default': -1 },
 		acl:			{ 								//for boards
@@ -105,7 +101,7 @@ var Backend = function() {
 	self.List = mongoose.model('list', itemSchema);
 	self.Card = mongoose.model('card', itemSchema);
 
-	var hasDuplicateAttributes = function(value) {
+/*	var hasDuplicateAttributes = function(value) {
 		if (!value) return true;
 		var seen = {};
 		value.forEach(function(attribute) {
@@ -116,7 +112,7 @@ var Backend = function() {
 	}
 	self.Board.schema.path('attribute').validate(hasDuplicateAttributes, 'Board has duplicate attributes');
 	self.List.schema.path('attribute').validate(hasDuplicateAttributes, 'List has duplicate attributes');
-	self.Card.schema.path('attribute').validate(hasDuplicateAttributes, 'Card has duplicate attributes');
+	self.Card.schema.path('attribute').validate(hasDuplicateAttributes, 'Card has duplicate attributes');*/
 
 	var userschema = {
 		google: {

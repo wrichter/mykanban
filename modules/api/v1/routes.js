@@ -120,7 +120,11 @@ module.exports = function(baseURL) {
 					board.instanceid, req.query.at, undefined, function(err, lists) {
 						if (err) throw err;
 						board.entry = [];
-						lists.forEach(function(list) { board.entry.push(list.instanceid); });
+						lists.forEach(function(list) {
+							if (! list.tag || list.tag.indexOf("*TRASH") < 0) {
+								board.entry.push(list.instanceid);
+							}
+						} );
 						backend.Card.findInstancesContainedBy(board.entry, req.query.at, undefined, function(err, cards) {
 							if (err) throw err;								//add lists to board
 							//create hashmap mapping list id to array of cards
@@ -190,16 +194,24 @@ module.exports = function(baseURL) {
 
 	self.router.put('/card/:cardid', function (req, res) {
 		loadCardAndEnforceAccess(req, res, req.params.cardid, false, true, function(board, oldlist, oldcard) {
-			var newcard = new backend.Card({
+			var newCard = new backend.Card({
 				'instanceid': req.params.cardid
 			});
-			self.pr.parse(req.body, newcard);
+			self.pr.parse(req.body, newCard);
 
-			//TODO - see what changed and invoke functions if necessary
-
-			newcard.save(function(err, card, numberAffected) {
-				if (err) throw err;
-				else res.status(200).send();
+			backend.List.findInstance( newCard.containedBy, undefined, undefined, function( err, newList ) {
+				if (err ) throw err;
+				else if ( newList == null ) {
+					res.status(400).send("listid " + newCard.containedBy + " not found");
+				} else {
+					//see what changed and invoke functions if necessary
+					heuristics.applyCardHeuristics(board, oldlist, oldcard, newList, newCard);
+					newCard.markModified('attribute');
+					newCard.save(function(err, card, numberAffected) {
+						if (err) throw err;
+						else res.status(200).send( self.pr.renderCard( newCard, undefined) );
+					});
+				}
 			});
 		});
 	});
@@ -228,7 +240,7 @@ module.exports = function(baseURL) {
 	//get all boards - RC5023 5.2
 	self.router.get('/boards', function(req,res) { //TODO validate ACL!
 		backend.Board.find({ validTo: { $exists: false } },undefined,undefined, function(err, boards) {
-console.log(err, boards, req.user._id);
+//console.log(err, boards, req.user._id);
 			if (err) throw err;
 			else res.status(200).send(self.pr.renderBoardArray(boards));
 		});
@@ -239,7 +251,7 @@ console.log(err, boards, req.user._id);
 		loadListAndEnforceAccess( req, res, req.params.listid,
 															true, false, function( board, list ) {
 			list = list.shallowClone(false);
-			delete list.containedBy;	//TODO - move to "$TRASH" tagged board (?)
+			delete list.containedBy;	//TODO - move to "*TRASH" tagged board (?)
 			list.save( function( err, list, numberAffected ) {
 				if ( err ) { throw err;
 				} else { res.status( 200 ).send(); }
@@ -252,13 +264,13 @@ console.log(err, boards, req.user._id);
 															true, false, function( board, list, card ) {
 			card1 = card.shallowClone(false);
 
-			//if the board contains a list tagged "$TRASH"
+			//if the board contains a list tagged "*TRASH"
 			//move it there instead of simply orphaning it
 			backend.List.findInstancesContainedBy( board.instanceid, undefined, undefined,
-																	{ tag: "$TRASH" }, function( err, lists ) {
+																	{ tag: "*TRASH" }, function( err, lists ) {
 				if ( err ) { throw err;
 				} else {
-					if ( lists.length > 0 ) { //if we've found a $TRASH list
+					if ( lists.length > 0 ) { //if we've found a *TRASH list
 						card1.containedBy = lists[0].instanceid;
 					}
 					card1.save( function( err, card, numberAffected ) {
@@ -308,7 +320,7 @@ console.log(err, boards, req.user._id);
 
 				if (!newCard.link) newCard.link = [];
 				newCard.link.push(newLink);
-console.log(newCard);
+//console.log(newCard);
 				newCard.save(function(err, newCard) {
 					if (err) throw err;
 					res.status(200).send(self.pr.renderCard(newCard));

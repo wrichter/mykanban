@@ -25,41 +25,41 @@
 
         <span class="pull-right">
           <span class="glyphicon glyphicon-trash" ng-click="removeList(board, list)"  ng-show="getLinkOfRel(list, 'remove')"></span>
-          <!-- Simple dropdown -->
+
+          <!-- group by dropdown -->
           <span class="dropdown"  dropdown>
             <span class="dropdown-toggle glyphicon glyphicon-list" dropdown-toggle></span>
             <ul class="dropdown-menu dropdown-menu-right">
               <li role="presentation" class="dropdown-header">Group by:</li>
-              <li><a ng-click="groupBy(board,list)">None<span ng-show="!uiSelectedGroupByAttribute[list.href]" class="pull-right glyphicon glyphicon-ok"></span></a></li>
+              <li><a ng-click="setGroupBy(list, undefined)">None<span ng-show="!getGroupBy(list)" class="pull-right glyphicon glyphicon-ok"></span></a></li>
               <li class="divider"></li>
 
-              <li ng-repeat="attr in uiGroupByAttributes">
-                <a ng-click="groupBy(board, list, attr)">{{attr.name}}
-                  <span ng-show="attr == uiSelectedGroupByAttribute[list.href]" class="pull-right glyphicon glyphicon-ok"></span>
+              <li ng-repeat="grouping in groupingsAvailable">
+                <a ng-click="setGroupBy(list, grouping)">{{grouping.name}}
+                  <span ng-show="getGroupBy(list) === grouping" class="pull-right glyphicon glyphicon-ok"></span>
                 </a>
               </li>
             </ul>
           </span>
+
+          <!-- aggregate dropdown -->
           <span class="dropdown"  dropdown>
             <span class="dropdown-toggle glyphicon glyphicon-stats" dropdown-toggle></span>
             <ul class="dropdown-menu dropdown-menu-right">
               <li role="presentation" class="dropdown-header">Aggregate by:</li>
-              <li><a ng-click="aggregate(board,list)">None<span ng-show="!uiSelectedAggregateAttribute[list.href]" class="pull-right glyphicon glyphicon-ok"></span></a></li>
+              <li><a ng-click="list.$aggregate = null">None<span ng-show="!list.$aggregate" class="pull-right glyphicon glyphicon-ok"></span></a></li>
               <li class="divider"></li>
-              <li ng-repeat="attr in uiAggregateAttributes" >
-                <a ng-click="aggregate(board, list, attr)">{{attr.name}}
-                 <span ng-show="attr == uiSelectedAggregateAttribute[list.href]" class="pull-right glyphicon glyphicon-ok"></span>
+              <li ng-repeat="attr in aggregatesAvailable" >
+                <a ng-click="list.$aggregate = attr">{{attr.name}}
+                 <span ng-show="attr === list.$aggregate" class="pull-right glyphicon glyphicon-ok"></span>
                 </a>
               </li>
             </ul>
           </span>
         </span>
 
-
-        <!-- TODO: Cluster tag or attribute, Aggregate function and attribute -->
-
         <!-- the list itself (sortable) -->
-        <div ng-show="!uiGroups[list.href]">
+        <div ng-show="!getGroups(list)">
           <div ui-sortable="cardSortableOptions" class="mk-list" ng-model="list.entry">
             <div data-ng-repeat="card in list.entry"
                   mk-card
@@ -68,30 +68,30 @@
             <div ng-show="list.entry.length == 0"><!--dropzone if no card is in list--><br/></div>
           </div>
 
-          <div ng-show="uiAggregates[list.href] != undefined" class="pull-right">
-            {{uiAggregates[list.href]}}
+          <div ng-show="list.$aggregate" class="pull-right">
+            {{list.$aggregate.name}}: {{list.$aggregate.display(aggregate(list, list.$aggregate))}}
           </div>
 
           <div class="addCard" ng-show="at == null"><a ng-click="newCard(list)">Add Card...</a></div>
         </div>
 
         <!-- the list itself, clustered, unsortable -->
-        <div ng-show="uiGroups[list.href]">
+        <div ng-show="getGroups(list)">
           <div class="mk-list">
-            <div ng-repeat="group in uiGroups[list.href]">
+            <div ng-repeat="group in getGroups(list)">
               <div class="mk-clusterheader">
-                <span class="mk-clustertitle">{{group.groupValue}}</span><span class="mk-clusteraggregate" ng-show="group.uiAggregate">{{group.uiAggregate}}</span>
+                <span class="mk-clustertitle">{{getGroupBy(list).display(group.groupValue)}}</span><span class="mk-clusteraggregate" ng-show="list.$aggregate">{{list.$aggregate.display(aggregate(group, list.$aggregate))}}</span>
                 <hr />
               </div>
-              <div data-ng-repeat="card in group.contents"
+              <div data-ng-repeat="card in group.entry"
                     mk-card
                     mk-link-grabber ng-model="card"
                     class="panel panel-default mk-card"></div>
             </div>
           </div>
 
-          <div ng-show="uiAggregates[list.href] != undefined" class="pull-right">
-            {{uiAggregates[list.href]}}
+          <div ng-show="list.$aggregate" class="pull-right">
+            {{list.$aggregate.name}}: {{list.$aggregate.display(aggregate(list, list.$aggregate))}}
           </div>
         </div>
 

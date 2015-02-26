@@ -85,9 +85,18 @@ module.controller( "ViewController", [
     disabled: ($scope.at != null),
     stop: function( e, ui ) {
       var s = ui.item.sortable;
-      //console.log("stop", s.index,  s.sourceModel, s.dropindex, s.droptargetModel, ui.sender);
       if ( s.droptargetModel ) {
+        var card = ( s.droptargetModel.length == 1 ) ?
+                      s.droptargetModel[ 0 ] :
+                      s.droptargetModel[ s.dropindex ];
         CardService.updateCardPosition( $scope.board, s.droptargetModel, s.dropindex )
+            .success( function( updatedCard ) { //TODO - was passiert im falle eines MAss Updates???
+              for ( var prop in updatedCard ) {
+                if ( updatedCard.hasOwnProperty( prop ) ) {
+                  card[prop] = updatedCard[prop];
+                }
+              }
+            } )
             .error( alertHTTPError );
       }
     }
@@ -205,7 +214,7 @@ module.controller( "ViewController", [
     var res = [];
     if ( $scope.board ) {
       $scope.board.entry.forEach( function( list ) {
-          if ( list.tag && list.tag.indexOf( "$TRASH" ) < 0 ) {
+          if ( list.tag && list.tag.indexOf( "*TRASH" ) < 0 ) {
             res.push( list );
           }
       } );
@@ -229,7 +238,7 @@ module.controller( "ViewController", [
     }
   }
 
-  // -------- TODO ------------
+  // -------- TODO - leftover from the idea of the backend requesting additional credentials ------------
 
   $scope.get_password = function(auth, promise) {
     var modalInstance = $modal.open({
@@ -244,147 +253,152 @@ module.controller( "ViewController", [
     modalInstance.result.then(promise);
   }
 
-  $scope.groupArrayOfObjects = function(list, board, func) {
-    var arrayClone = list.contents.slice(0);
 
+  //---- Aggregation of card values
+
+  function totalDuration( valueStore, card, attributeName ) {
+    if ( valueStore.total === undefined ) {
+      valueStore.total = 0;
+    }
+    if ( valueStore.count === undefined ) {
+      valueStore.count = 0;
+    }
+    if ( card.attribute[ attributeName ] && card.attribute[ attributeName ].duration ) {
+      valueStore.total += card.attribute[ attributeName ].duration;
+      valueStore.count++;
+    }
+  }
+
+  function displayDuration( duration ) {
+    var res = "", hours, minutes, seconds;
+
+    seconds = Math.floor(duration / 1000);
+    minutes = Math.floor(seconds / 60);
+    hours = Math.floor(minutes / 60);
+
+    minutes -= hours * 60;
+    seconds -= minutes * 60;
+
+    if ( hours > 0) {
+      res += hours + "h ";
+    }
+    if (minutes > 0) {
+      res += minutes + "m ";
+    }
+    res += seconds + "s ";
+    return res;
+  }
+
+  $scope.aggregatesAvailable = [
+    {
+      name: "Average Doing duration",
+      aggregate: function( valueStore, card ) { totalDuration( valueStore, card, "TRACKDOING" ); },
+      evaluate:  function( valueStore ) { return valueStore.total / valueStore.count; },
+      display: displayDuration
+    },
+    {
+      name: "Total Doing duration",
+      aggregate: function( valueStore, card ) { totalDuration( valueStore, card, "TRACKDOING" ); },
+      evaluate:  function( valueStore ) { return valueStore.total; },
+      display: displayDuration
+    }
+  ];
+
+  $scope.aggregate = function( list, agg ) {
+    if ( !agg ) return undefined;
+    var valueStore = { total: 0, count: 0 };
+    list.entry.forEach( function( card ) { agg.aggregate( valueStore, card ); } );
+    return agg.evaluate(valueStore);
+  }
+
+  //---- Grouping of card values
+
+  $scope.groupingsAvailable = [
+    {
+      name: "Weekday done",
+      func: function( card ) {
+        if ( !card.attribute || !card.attribute["TRACKDONE"] || !card.attribute["TRACKDONE"].entry ) {
+          return undefined;
+        }
+        var entry = card.attribute["TRACKDONE"].entry;
+        if ( typeof entry === "string" ) {
+          entry = new Date(entry);
+        }
+        return entry.getDay();
+      },
+      display: function ( day ) {
+        if (!day) {
+          return undefined;
+        } else {
+          return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][day];
+        }
+      }
+    }
+  ];
+  $scope.groupBy = function( list, grouping ) {
+    if ( ! grouping ) {
+      return list;
+    }
+
+    var arrayClone = list.entry.slice(0);
     var i = 0;
-    arrayClone.forEach(function(element, index, array) { element.$_tempKey = i++; });
+
+    //add ascending temp key to remain sort order within group
+    var originalIndex = {};
+    arrayClone.forEach(function(element, index, array) { originalIndex[element.href] = i++; });
     arrayClone.sort(function(a,b) {
-      if (a[property] < b[property]) { //TODO
+      if (grouping.func(a) < grouping.func(b)) {
         return -1;
-      } else if (a[property] > b[property]) {
+      } else if (grouping.func(a) > grouping.func(b)) {
         return 1;
       } else {
-        if (a.$_tempKey < b.$_tempKey) {
+        if (originalIndex[a.href] < originalIndex[b.href]) {
           return -1;
-        } else if (a.$_tempKey > b.$_$tempKey ) {
+        } else if ( originalIndex[a.href] > originalIndex[b.href] ) {
           return 1;
         } else {
           return 0;
         }
       }
     });
-    arrayClone.forEach(function(element, index, array) { delete element.$_tempKey; });
 
-    var groups = [];
-    var currentGroup = {};
-
+    //add new group to result list whenever the property value changes
+    var result = [];
+    var currentGroup;
     for (i=0; i<arrayClone.length; i++) {
-      var propValue = (arrayClone[i][property]) ? arrayClone[i][property] : "undefined";
-      if (!currentGroup.groupValue || currentGroup.groupValue != propValue) {
+      var propValue = grouping.func(arrayClone[i]);
+      if (!currentGroup || currentGroup.groupValue != propValue) {
         currentGroup = {
-          groupProperty: property,
+          groupProperty: grouping.name,
           groupValue: propValue,
-          contents: []
+          entry: [],
+          aggregate: undefined
         }
-        groups.push(currentGroup);
+        result.push(currentGroup);
       }
-      currentGroup.contents.push(arrayClone[i]);
+      currentGroup.entry.push(arrayClone[i]);
     }
-    return groups;
-  };
+    return result;
+  }
 
-  $scope.uiAggregates = {};
-  $scope.uiAggregateAttributes = [
-    {
-      name: "Avg. Duration",
-      func: function(valueStore, card, list, board) {
-        if (valueStore.result == undefined) {
-          valueStore.result = 0;
-        }
-        valueStore.result += card.duration / list.contents.length;
-      }
-    }, {
-      name: "Total Duration",
-      func: function(valueStore, card, list, board) {
-        if (valueStore.result == undefined) {
-          valueStore.result = 0;
-        }
-        valueStore.result += card.duration;
-      }
-    }
-  ]
-  $scope.uiSelectedAggregateAttribute = {};
-
-  $scope.aggregate = function(board, list, attr) {
-    $scope.uiSelectedAggregateAttribute[list.href] = attr;
-    if (attr) {
-      // für die Liste
-      var valueStore = { result: undefined };
-      list.contents.forEach(function(element, index, array) { attr.func(valueStore, element, list, board); });
-      $scope.uiAggregates[list.href] = valueStore.result;
-
-      if ($scope.uiGroups[list.href]) {
-        $scope.uiGroups[list.href].forEach(function(e,i,a) {
-          valueStore = { result: undefined };
-          e.contents.forEach(function(element, index, array) { attr.func(valueStore, element, e, board); });
-          e.uiAggregate = valueStore.result;
-        });
-      }
+  $scope.setGroupBy = function(list, grouping) {
+    if ( grouping ) {
+      list.$groups = $scope.groupBy( list, grouping );
+      list.$groupBy = grouping;
     } else {
-      delete $scope.uiAggregates[list.href];
+      delete list.$groups;
+      delete list.$groupBy;
     }
   }
 
-  $scope.uiGroups = {};
-  $scope.uiGroupByAttributes = [
-    {
-      name: "Weekday",
-      func: function(card, list, board) { return card.weekday }
-    }, {
-      name: "SomeOtherValue",
-      func: function(card, list, board) { return undefined }
-    }
-  ];
-  $scope.uiSelectedGroupByAttribute = {};
-  $scope.groupBy = function(board, list, attr) {
-    $scope.uiSelectedGroupByAttribute[list.href] = attr;
-    if (attr) {
-      var arrayClone = list.contents.slice(0);
-
-      var i = 0;
-      //add ascending temp key to remain sort order within group
-      arrayClone.forEach(function(element, index, array) { element.$_tempKey = i++; });
-      arrayClone.sort(function(a,b) {
-        if (attr.func(a) < attr.func(b)) { //TODO
-          return -1;
-        } else if (attr.func(a) > attr.func(b)) {
-          return 1;
-        } else {
-          if (a.$_tempKey < b.$_tempKey) {
-            return -1;
-          } else if (a.$_tempKey > b.$_$tempKey ) {
-            return 1;
-          } else {
-            return 0;
-          }
-        }
-      });
-      //remove temp key
-      arrayClone.forEach(function(element, index, array) { delete element.$_tempKey; });
-
-      //add new group to result list whenever the property value changes
-      $scope.uiGroups[list.href] = [];
-      var currentGroup = {};
-      for (i=0; i<arrayClone.length; i++) {
-        var propValue = (attr.func(arrayClone[i])) ? attr.func(arrayClone[i]) : "undefined";
-        if (!currentGroup.groupValue || currentGroup.groupValue != propValue) {
-          currentGroup = {
-            groupProperty: attr.name,
-            groupValue: attr.func(arrayClone[i]),
-            contents: [],
-            uiAggregate: undefined
-          }
-          $scope.uiGroups[list.href].push(currentGroup);
-        }
-        currentGroup.contents.push(arrayClone[i]);
-      }
-      //recalculate aggregate
-      $scope.aggregate(board, list, $scope.uiSelectedAggregateAttribute[list.href]);
-    } else {
-       delete $scope.uiGroups[list.href];
-    }
+  $scope.getGroupBy = function(list) {
+    return list.$groupBy;
   }
+
+  $scope.getGroups = function( list ) {
+    return list.$groups;
+  }
+
 }]);
 
 

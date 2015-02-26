@@ -192,7 +192,7 @@ function ensureProperPositionHints( $q, item, newItemArray, changedIndex, update
       httpRequests.push( update( i ) );
     } );
     promise = $q.all( httpRequests );
-    promise.success = function( func ) { return promise.then( func ); };
+    promise.success = function( func ) { return promise.then( function( resArray ) { func( resArray[ changedIndex ] ) } ); };
     promise.error = function( func ) { return promise.then( undefined, func ); };
     return promise;
   }

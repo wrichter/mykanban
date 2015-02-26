@@ -31,7 +31,7 @@ module.exports = function( baseURL ) {
 			rendered.link.push( { rel: 'collection', method: 'GET', href: hrefContainerAt } );
 		}
 		rendered.tag = (container.tag)?container.tag:[];
-	  rendered.attribute = (container.attribute)?container.attribute:[];
+	  rendered.attribute = (container.attribute)?container.attribute:{};
 		if (container.positionHint) rendered.positionHint = container.positionHint;
 		if (container.link) container.link.forEach(function(link) {
 			rendered.link.push({

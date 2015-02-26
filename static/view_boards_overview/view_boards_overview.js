@@ -29,11 +29,10 @@ module.controller( "BoardsOverviewController", [
   $scope.alerts = [];
 
   function loadBoards() {
+console.log("loadBoards");
     BoardService.getAllBoards()
-                .success( function( boards ) { $scope.boards = boards; } )
-                .error( function( data, status, headers, config, statusText ) {
-                      alertHTTPError( data, status, headers, config, statusText );
-                } );
+                .success( function( boards ) { console.log("success"); $scope.boards = boards; } )
+                .error( alertHTTPError );
   }
   loadBoards();
 

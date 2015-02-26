@@ -7,6 +7,5 @@ angular.module('MyKanban', ['ngRoute', 'MyKanban.view.boards', 'MyKanban.view.bo
     templateUrl: "login.html"
   } );
 
-
   $routeProvider.otherwise({redirectTo: '/login'});
 }]);

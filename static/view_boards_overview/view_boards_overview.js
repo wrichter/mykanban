@@ -31,7 +31,7 @@ module.controller( "BoardsOverviewController", [
   function loadBoards() {
 console.log("loadBoards");
     BoardService.getAllBoards()
-                .success( function( boards ) { console.log("success", boards, $scope.boards); $scope.boards = boards; $scope.$apply(); } )
+                .success( function( boards ) { console.log("success", boards, $scope.boards); $scope.boards = boards; } )
                 .error( alertHTTPError );
   }
   loadBoards();

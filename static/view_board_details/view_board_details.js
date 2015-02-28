@@ -17,12 +17,6 @@ module.config( [ "$routeProvider", function( $routeProvider ) {
     templateUrl: "view_board_details/view_board_details.html",
     controller: "ViewController",
   } );
-
-  /*$routeProvider.when("/board/:boardid/:at", {
-    templateUrl: "view_board/view_board.html",
-    controller: "ViewController"
-  } );*/
-
 } ] );
 
 module.controller( "ViewController", [
@@ -142,17 +136,20 @@ module.controller( "ViewController", [
         .error( alertHTTPError );
   };
 
-  $scope.removeCard = function( list, card ) {
-    $modal.open({
+  function alertDialogResult(title, message) {
+    return $modal.open({
       templateUrl: 'view_alert_dialog/view_alert_dialog.html',
       controller: 'AlertDialogInstanceCtrl',
       resolve: {
-        title: function() { return "Delete Card"; },
-        message: function() {
-          return "Really delete the card titled '" + card.title + "'?";
-        }
+        title: function() { return title; },
+        message: function() { return message; }
       }
-    }).result.then(function() {
+    }).result;
+  }
+
+  $scope.removeCard = function( list, card ) {
+    alertDialogResult( "Delete Card", "Really delete the card titled '" + card.title + "'?" )
+    .then(function() {
       CardService.remove( card )
       .success( function() { list.entry.splice( list.entry.indexOf( card ), 1 ); } )
       .error( alertHTTPError );
@@ -168,19 +165,34 @@ module.controller( "ViewController", [
   };
 
   $scope.removeList = function( board, list ) {
-    $modal.open({
-      templateUrl: 'view_alert_dialog/view_alert_dialog.html',
-      controller: 'AlertDialogInstanceCtrl',
-      resolve: {
-        title: function() { return "Delete List"; },
-        message: function() { return "Really delete the list titled '" + list.title + "'? " +
-        "Note that all items contained in the list will also be unaccessible."; }
-      }
-    }).result.then(function() {
+    alertDialogResult( "Delete List", "Really delete the list titled '" + list.title + "'? " +
+    "Note that all items contained in the list will also be unaccessible.")
+    .then( function() {
       ListService.remove( list )
         .success( function() { board.entry.splice( board.entry.indexOf( list ), 1 ); } )
         .error( alertHTTPError );
-    });
+    } );
+  };
+
+  $scope.clearList = function( board, list ) {
+    alertDialogResult( "Clear List", "Really clear the list titled '" + list.title + "'?" )
+    .then( function() {
+      var promise;
+
+      list.entry.forEach( function( card ) {
+        if ( !promise ) {
+          promise = CardService.remove( card )
+            .success( function() { list.entry.splice( list.entry.indexOf( card ), 1 ); } )
+            .error( alertHTTPError );
+        } else {
+          promise.success( function() {
+            promise = CardService.remove( card )
+              .success( function() { list.entry.splice( list.entry.indexOf( card ), 1 ); } )
+              .error( alertHTTPError );
+          } );
+        }
+      } );
+    } );
   };
 
   $scope.listTextChanged = function( list ) {

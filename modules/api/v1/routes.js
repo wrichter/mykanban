@@ -249,7 +249,7 @@ module.exports = function(baseURL) {
 	//Delete
 	self.router.post( '/list/:listid/makeUnavailable', function( req, res ) {
 		loadListAndEnforceAccess( req, res, req.params.listid,
-															true, false, function( board, list ) {
+															false, true, function( board, list ) {
 			list = list.shallowClone(false);
 			delete list.containedBy;	//TODO - move to "*TRASH" tagged board (?)
 			list.save( function( err, list, numberAffected ) {
@@ -259,9 +259,10 @@ module.exports = function(baseURL) {
 		} );
 	} );
 
+
 	self.router.post( '/card/:cardid/makeUnavailable', function( req, res ) {
 		loadCardAndEnforceAccess( req, res, req.params.cardid,
-															true, false, function( board, list, card ) {
+															false, true, function( board, list, card ) {
 			card1 = card.shallowClone(false);
 
 			//if the board contains a list tagged "*TRASH"

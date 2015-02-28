@@ -24,7 +24,6 @@
       <span class="listName" ng-show="at != null" >{{list.title}}</span>
 
         <span class="pull-right">
-          <span class="glyphicon glyphicon-trash" ng-click="removeList(board, list)"  ng-show="getLinkOfRel(list, 'remove')"></span>
 
           <!-- group by dropdown -->
           <span class="dropdown"  dropdown>
@@ -56,6 +55,16 @@
               </li>
             </ul>
           </span>
+
+          <!-- menu dropdown -->
+          <span class="dropdown" dropdown ng-show="getLinkOfRel(list, 'remove')">
+            <span class="dropdown-toggle glyphicon glyphicon-menu-hamburger" dropdown-toggle></span>
+            <ul class="dropdown-menu dropdown-menu-right">
+              <li><a ng-click="clearList(board, list)" ><span class="glyphicon glyphicon-remove-sign"></span>Clear List</a>
+              <li><a ng-click="removeList(board, list)"><span class="glyphicon glyphicon-trash"></span>Remove List</a>
+            </ul>
+          </span>
+
         </span>
 
         <!-- the list itself (sortable) -->

@@ -23,15 +23,15 @@ module.controller( "BoardsOverviewController", [
                       "$modal",
                       "$http",
                       "BoardService",
-                       function( $scope, $location, $routeParams, $modal, $http, BoardService ) {
+                      "ListService",
+                       function( $scope, $location, $routeParams, $modal, $http, BoardService, ListService ) {
 
   $scope.boards = null;
   $scope.alerts = [];
 
   function loadBoards() {
-console.log("loadBoards");
     BoardService.getAllBoards()
-                .success( function( boards ) { console.log("success", boards, $scope.boards); $scope.boards = boards; } )
+                .success( function( boards ) { $scope.boards = boards; } )
                 .error( alertHTTPError );
   }
   loadBoards();
@@ -47,7 +47,40 @@ console.log("loadBoards");
   }
 
   $scope.navigateTo = function(href) {
-    console.log("/board/" + href.substring(14))   ;
+    //console.log("/board/" + href.substring(14))   ;
     $location.path("/board/" + href.substring(14));
   }
+
+
+  $scope.createDefaultBoard = function() {
+    // create board
+    BoardService.create( { title: "New Board" } )
+      .error( alertHTTPError )
+      .success( function( board ) {
+        return ListService.create(board, { title: "Backlog", containedBy: board.instanceid } )
+          .error( alertHTTPError )
+          .success( function() {
+            return ListService.create(board, { title: "Ready", containedBy: board.instanceid } );
+          } )
+          .error( alertHTTPError )
+          .success( function() {
+            return ListService.create(board, { title: "Doing", containedBy: board.instanceid,
+                    attribute: { "*TRACK": "TRACKDOING" } } );
+          } )
+          .error( alertHTTPError )
+          .success( function() {
+            return ListService.create(board, { title: "Done", containedBy: board.instanceid,
+                    attribute: { "*TRACK": "TRACKDONE" } } );
+          } )
+          .error( alertHTTPError )
+          .success( function() {
+            return ListService.create(board, { title: "TRASH", containedBy: board.instanceid,
+                    tag: [ "*TRASH" ] } )
+          } )
+          .error( alertHTTPError )
+          .success( function() {
+            $scope.navigateTo( board.href );
+          } );
+    } );
+  };
 } ] );

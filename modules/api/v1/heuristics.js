@@ -18,7 +18,7 @@ var Heuristics = function() {
         newCard.attribute = {};
       }
 
-      if (oldList.attribute["*TRACK"]) {
+      if ( oldList.attribute && oldList.attribute["*TRACK"]) {
         var val = newCard.attribute[oldList.attribute["*TRACK"]];
         if ( !val ) {
           val = { type: "mykanban/track" };
@@ -33,7 +33,7 @@ var Heuristics = function() {
         val.containedBy = oldList.instanceid;
         newCard.attribute[oldList.attribute["*TRACK"]] = val;
       }
-      if (newList.attribute["*TRACK"]) {
+      if ( newList.attribute && newList.attribute["*TRACK"] ) {
         var val = newCard.attribute[newList.attribute["*TRACK"]];
         if ( !val ) {
           val = { type: "mykanban/track" };

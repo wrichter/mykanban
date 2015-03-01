@@ -2,6 +2,14 @@
   <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
 
-<div ng-show="boards != null">
-  <a ng-repeat="board in boards" ng-click="navigateTo(board.href)">{{board.title}}</a>
+<div ng-show="boards != null" class="col-md-2">
+  <a ng-repeat="board in boards" ng-click="navigateTo(board.href)">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        {{board.title}}
+      </div>
+    </div>
+  </a>
 </div>
+
+<a ng-click="createDefaultBoard()">Create Board...</a>
